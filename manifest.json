@@ -1,0 +1,30 @@
+{
+    "manifest_version": 3,
+    "name": "Storage Transfer",
+    "version": "1.0",
+    "description": "Transfer localStorage, sessionStorage and cookies between tabs",
+    "permissions": [
+      "tabs",
+      "cookies",
+      "storage",
+      "scripting",
+      "activeTab"
+    ],
+    "host_permissions": [
+      "<all_urls>"
+    ],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "logo_16.png",
+        "48": "logo_48.png",
+        "128": "logo_128.png"
+      }
+    },
+    "icons": {
+      "16": "logo_16.png",
+      "48": "logo_48.png",
+      "128": "logo_128.png"
+    }
+  }
+  
