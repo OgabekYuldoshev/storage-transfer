@@ -44,7 +44,7 @@ async function loadCurrentTab() {
   
   try {
     const url = new URL(tab.url);
-    document.getElementById('currentTabInfo').textContent = `${tab.title || 'Untitled'} (${url.hostname})`;
+    document.getElementById('currentTabInfo').textContent = `${tab.title || 'Untitled'} (${url.hostname}${url.port ? ':' + url.port : ''})`;
   } catch (error) {
     document.getElementById('currentTabInfo').textContent = tab.title || 'Current tab';
   }
@@ -57,12 +57,27 @@ async function loadOtherTabs() {
   }
   
   const allTabs = await chrome.tabs.query({});
-  tabs = allTabs.filter(tab => 
-    tab.id !== currentTab.id && 
-    tab.url && 
-    !tab.url.startsWith('chrome://') &&
-    !tab.url.startsWith('chrome-extension://')
+
+  tabs = allTabs.filter(
+    (tab) => tab.id !== currentTab.id && tab.url && tab.url.startsWith('http')
   );
+
+  tabs.sort((a, b) => {
+    const getPriority = (url) => {
+      if (!url) return 99;
+      if (url.startsWith('http://localhost')) return 0;
+      if (url.startsWith('http://127.0.0.1')) return 1;
+      if (url.startsWith('http://192.')) return 2;
+      if (url.startsWith('http://dev')) return 3;
+      if (url.startsWith('https://dev')) return 4;
+      return 5;
+    };
+    const aPriority = getPriority(a.url);
+    const bPriority = getPriority(b.url);
+    if (aPriority < bPriority) return -1;
+    if (aPriority > bPriority) return 1;
+    return 0;
+  });
   
   const targetSelect = document.getElementById('targetTab');
   tabs.forEach(tab => {
@@ -70,7 +85,7 @@ async function loadOtherTabs() {
       const url = new URL(tab.url);
       const title = tab.title ? tab.title.substring(0, 50) : 'Untitled';
       const option = new Option(
-        `${title}... (${url.hostname})`,
+        `${title}... (${url.hostname}${url.port ? ':' + url.port : ''})`,
         tab.id
       );
       targetSelect.add(option);
