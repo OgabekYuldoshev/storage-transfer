@@ -1,115 +1,128 @@
-# Storage Transfer
+# 🔄 Storage Transfer
 
-Chrome extension for transferring localStorage, sessionStorage, and cookies between browser tabs.
+**Developer tool** for transferring localStorage, sessionStorage, and cookies between browser tabs.
 
-## Features
+> ⚠️ **For Developers Only** - This extension is designed for web developers who need to transfer storage data between different environments (localhost, staging, production) during development and testing.
 
-- 🔄 **Transfer Storage Data** - Easily transfer localStorage, sessionStorage, and cookies from one tab to another
-- 🎯 **Selective Transfer** - Choose specific storage items to transfer
-- 🎨 **Minimal UI** - Clean and intuitive interface with dark theme
-- ⚡ **Fast & Efficient** - Quick loading and transfer of storage data
-- 🔒 **Secure** - Works only with your active tabs
+## ✨ Features
 
-## Installation
+- 📦 Transfer localStorage, sessionStorage, and cookies between tabs
+- ✅ Select specific items to transfer
+- 🎨 Modern dark theme UI (Catppuccin inspired)
+- 🔒 Works only with HTTP/HTTPS tabs
+- 🎯 Smart tab sorting (localhost and dev domains prioritized)
 
-### From Source
+## 📥 Installation
 
-1. Clone this repository:
-```bash
-git clone https://github.com/yourusername/storage-transfer.git
-cd storage-transfer
-```
+1. 📂 Download or clone this repository
+2. 🌐 Open Chrome and go to `chrome://extensions/`
+3. 🔧 Enable "Developer mode" (toggle top right)
+4. 📦 Click "Load unpacked" and select this folder
+5. 🎉 Extension icon will appear in toolbar
 
-2. Open Chrome and navigate to `chrome://extensions/`
+## 🚀 Usage
 
-3. Enable "Developer mode" (toggle in the top right)
+1. 🔍 Open the tab with storage data you want to copy
+2. 🖱️ Click the extension icon
+3. 🎛️ Select storage type (Local, Session, or Cookies)
+4. ☑️ Check the items you want to transfer
+5. 🎯 Select destination tab from dropdown
+6. ✨ Click "Transfer Storage"
 
-4. Click "Load unpacked" and select the `storage-transfer` directory
+## 💡 Common Developer Use Cases
 
-5. The extension icon will appear in your Chrome toolbar
+- 🔑 **Copy auth tokens from production to localhost** - Test with real user sessions locally
+- 🔄 **Transfer session data between ports** - Move data from `:3000` to `:8080` 
+- 🐛 **Debug with production cookies** - Replicate user issues in dev environment
+- 🌍 **Multi-environment testing** - Copy storage between staging/dev/prod
+- 🎫 **API token management** - Transfer authentication tokens between tabs
 
-## Usage
+## 🔐 Permissions
 
-1. **Open the extension** by clicking the icon in your Chrome toolbar
+- 📑 `tabs` - Access browser tabs
+- 🍪 `cookies` - Read and write cookies
+- 💾 `storage` - Extension storage
+- 💉 `scripting` - Inject scripts to read storage data
+- 👆 `activeTab` - Access current tab
+- 🌐 `<all_urls>` - Access all websites
 
-2. **Select storage type** to load:
-   - Click "Local" to load localStorage
-   - Click "Session" to load sessionStorage
-   - Click "Cookies" to load cookies
-
-3. **Select items** you want to transfer (use "Select all" for convenience)
-
-4. **Choose destination tab** from the dropdown menu
-
-5. **Click "Transfer Storage"** to complete the transfer
-
-## Permissions
-
-This extension requires the following permissions:
-
-- `tabs` - To access and list browser tabs
-- `cookies` - To read and set cookies
-- `storage` - To access extension storage
-- `scripting` - To inject scripts for reading storage data
-- `activeTab` - To access the current active tab
-- `<all_urls>` - To access storage data from all websites
-
-## Project Structure
+## 📁 Project Structure
 
 ```
 storage-transfer/
-├── manifest.json      # Extension manifest file
-├── popup.html         # Extension popup UI
-├── popup.js           # Extension logic and functionality
-├── logo_16.png        # Extension icon (16x16)
-├── logo_48.png        # Extension icon (48x48)
-├── logo_128.png       # Extension icon (128x128)
-└── README.md          # This file
+├── 📄 manifest.json      # Extension configuration
+├── 🎨 popup.html         # UI interface
+├── ⚙️  popup.js           # Main logic (~470 lines)
+├── 🖼️  logo_16.png        # Icon 16x16
+├── 🖼️  logo_48.png        # Icon 48x48
+├── 🖼️  logo_128.png       # Icon 128x128
+└── 📖 README.md          # This file
 ```
 
-## Development
+## ⚙️ How It Works
 
-### Technologies Used
+**💾 localStorage/sessionStorage:** 
+- 💉 Uses `chrome.scripting.executeScript()` to inject code into source tab
+- 📖 Reads all storage items with `localStorage.getItem()` / `sessionStorage.getItem()`
+- ✅ User selects specific items to transfer
+- 💉 Injects code into destination tab and writes with `setItem()`
 
-- **Manifest V3** - Latest Chrome extension API
-- **Vanilla JavaScript** - No frameworks, pure JS
-- **HTML/CSS** - Modern, minimal UI design
+**🍪 Cookies:** 
+- 📥 Uses `chrome.cookies.getAll()` API to read cookies from source URL
+- 🔒 Preserves all attributes: domain, path, secure, httpOnly, sameSite, expiration
+- 📤 Uses `chrome.cookies.set()` to write to destination tab
 
-### Code Structure
+**🎯 Tab Sorting:**
+- 🚀 Automatically prioritizes development tabs in dropdown
+- 📊 Priority order: `localhost` → `127.0.0.1` → `192.x` → `dev.` domains → others
+- ⚡ Makes it faster to select local development targets
 
-- `popup.js` - Main extension logic:
-  - Tab management
-  - Storage data loading (localStorage, sessionStorage, cookies)
-  - Data transfer functionality
-  - UI state management
+## 🌐 Browser Support
 
-- `popup.html` - Extension popup interface:
-  - Minimal dark theme design
-  - Responsive layout
-  - Clean user experience
+- ✅ Chrome 88+
+- ✅ Edge 88+ (Chromium)
+- ✅ Brave, Opera (should work)
 
-## Browser Compatibility
+## 🔧 Troubleshooting
 
-- Chrome 88+ (Manifest V3 support required)
-- Edge 88+ (Chromium-based)
+- ⚠️ Extension only works on HTTP/HTTPS pages
+- ❌ Doesn't work on `chrome://` pages
+- ⏳ Both source and destination tabs must be fully loaded
 
-## License
+## 🛠️ Development
 
-MIT License - feel free to use and modify as needed.
+**🔧 Technologies:**
+- ⚡ Manifest V3 (Chrome Extensions API)
+- 📝 Vanilla JavaScript (no dependencies, ~470 lines)
+- 🎨 HTML/CSS (embedded styles, Catppuccin theme)
 
-## Contributing
+**🧩 Key Code Components:**
+- 🔄 `loadStorageType()` - Clears previous data, loads only selected type
+- 🚀 `transferStorage()` - Handles script injection and cookie API calls
+- 📋 `displayStorageItems()` - Renders checkboxes with metadata
+- 🎯 Tab sorting algorithm - Prioritizes localhost/dev environments
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+**🧪 Testing:**
+1. ✏️ Edit files (popup.js, popup.html)
+2. 🌐 Go to `chrome://extensions/`
+3. 🔄 Click refresh icon on extension
+4. 🧪 Test between two localhost tabs with different ports
+5. 🔍 Use DevTools: Right-click extension → "Inspect popup"
 
-## Issues
+**💡 Debug Tips:**
+```javascript
+// 🧪 Test localStorage transfer
+localStorage.setItem('authToken', 'test123');
+localStorage.setItem('userId', '456');
 
-If you encounter any issues or have suggestions, please open an issue on GitHub.
+// 🔍 Check console in popup DevTools for errors
+```
 
-## Version
+## 📄 License
 
-Current version: **1.0**
+MIT License ✨
 
----
+## 🏷️ Version
 
-Made with ❤️ for developers who need to transfer storage data between tabs.
+**Current version:** 1.0 🎉
 
