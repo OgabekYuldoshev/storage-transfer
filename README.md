@@ -1,128 +1,157 @@
-# 🔄 Storage Transfer
+# Storage Transfer
 
-**Developer tool** for transferring localStorage, sessionStorage, and cookies between browser tabs.
+Developer tool for transferring `localStorage`, `sessionStorage`, and cookies between browser tabs.
 
-> ⚠️ **For Developers Only** - This extension is designed for web developers who need to transfer storage data between different environments (localhost, staging, production) during development and testing.
+> For developers only. Built to move storage data between environments (localhost, staging, production) during development and testing.
 
-## ✨ Features
+<p align="center">
+  <img src="store/screenshots/2-select-items.png" alt="Storage Transfer — select items to transfer" width="100%" />
+</p>
 
-- 📦 Transfer localStorage, sessionStorage, and cookies between tabs
-- ✅ Select specific items to transfer
-- 🎨 Modern dark theme UI (Catppuccin inspired)
-- 🔒 Works only with HTTP/HTTPS tabs
-- 🎯 Smart tab sorting (localhost and dev domains prioritized)
+## Screenshots
 
-## 📥 Installation
+| | |
+|---|---|
+| ![Overview](store/screenshots/1-overview.png) | ![Select items](store/screenshots/2-select-items.png) |
+| ![Cookies](store/screenshots/3-cookies.png) | ![Transferred](store/screenshots/4-transferred.png) |
 
-1. 📂 Download or clone this repository
-2. 🌐 Open Chrome and go to `chrome://extensions/`
-3. 🔧 Enable "Developer mode" (toggle top right)
-4. 📦 Click "Load unpacked" and select this folder
-5. 🎉 Extension icon will appear in toolbar
+## Features
 
-## 🚀 Usage
+- Transfer localStorage, sessionStorage, and cookies between tabs
+- Select exactly which items to transfer
+- Searchable destination-tab picker (type to filter by title or host)
+- Cookies transfer with every attribute intact: domain, path, secure, httpOnly, sameSite, expiration
+- Smart tab sorting — localhost and dev domains surface first
+- Works only with HTTP/HTTPS tabs
 
-1. 🔍 Open the tab with storage data you want to copy
-2. 🖱️ Click the extension icon
-3. 🎛️ Select storage type (Local, Session, or Cookies)
-4. ☑️ Check the items you want to transfer
-5. 🎯 Select destination tab from dropdown
-6. ✨ Click "Transfer Storage"
+## Tech stack
 
-## 💡 Common Developer Use Cases
+- Manifest V3 (Chrome Extensions API)
+- TypeScript + React 19
+- Vite + [@crxjs/vite-plugin](https://crxjs.dev/vite-plugin) for MV3 bundling
+- Tailwind CSS v4 + [shadcn/ui](https://ui.shadcn.com)
+- [Bun](https://bun.sh) as package manager / runtime
 
-- 🔑 **Copy auth tokens from production to localhost** - Test with real user sessions locally
-- 🔄 **Transfer session data between ports** - Move data from `:3000` to `:8080` 
-- 🐛 **Debug with production cookies** - Replicate user issues in dev environment
-- 🌍 **Multi-environment testing** - Copy storage between staging/dev/prod
-- 🎫 **API token management** - Transfer authentication tokens between tabs
+## Development
 
-## 🔐 Permissions
+```bash
+bun install
+bun run dev      # Vite dev server with HMR for the extension
+bun run build    # production build -> dist/
+```
 
-- 📑 `tabs` - Access browser tabs
-- 🍪 `cookies` - Read and write cookies
-- 💾 `storage` - Extension storage
-- 💉 `scripting` - Inject scripts to read storage data
-- 👆 `activeTab` - Access current tab
-- 🌐 `<all_urls>` - Access all websites
+Load the extension:
 
-## 📁 Project Structure
+1. `bun run build`
+2. Open `chrome://extensions/`
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the `dist/` folder
+5. After code changes, re-run `bun run build` and click the refresh icon on the extension card (or use `bun run dev`, which CRXJS hot-reloads into an already-loaded unpacked extension)
+
+## Usage
+
+1. Open the tab with storage data you want to copy
+2. Click the extension icon
+3. Select storage type (Local, Session, or Cookies)
+4. Check the items you want to transfer
+5. Search for and pick a destination tab
+6. Click "Transfer"
+
+## Common use cases
+
+- Copy auth tokens from production to localhost to test with real user sessions locally
+- Transfer session data between ports, e.g. `:3000` to `:8080`
+- Debug with production cookies by replicating user issues in a dev environment
+- Copy storage between staging/dev/prod for multi-environment testing
+
+## Permissions
+
+The extension requests the minimum permissions its features need:
+
+- `cookies` — read cookies from the source tab and write selected cookies to the destination tab
+- `scripting` — inject a script to read storage in the source tab and write it in the destination tab (the core transfer mechanism)
+- `<all_urls>` host permission — source and destination tabs are often on different domains (e.g. production vs. localhost), so both permissions above need host access that isn't known ahead of time
+
+No analytics, no telemetry, no remote servers — see [`store/PRIVACY.md`](store/PRIVACY.md).
+
+## Project structure
 
 ```
 storage-transfer/
-├── 📄 manifest.json      # Extension configuration
-├── 🎨 popup.html         # UI interface
-├── ⚙️  popup.js           # Main logic (~470 lines)
-├── 🖼️  logo_16.png        # Icon 16x16
-├── 🖼️  logo_48.png        # Icon 48x48
-├── 🖼️  logo_128.png       # Icon 128x128
-└── 📖 README.md          # This file
+├── manifest.config.ts        # MV3 manifest (source of truth, typed)
+├── vite.config.ts            # Vite + CRXJS + Tailwind config
+├── index.html                 # popup entry
+├── public/icons/              # extension icons (16/48/128)
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx
+│   ├── index.css              # Tailwind + theme tokens
+│   ├── assets/
+│   │   └── logo.svg           # source vector for the app icon
+│   ├── hooks/
+│   │   └── use-storage-transfer.ts   # state + orchestration
+│   ├── lib/
+│   │   ├── chrome-storage.ts  # typed chrome.* API wrappers
+│   │   ├── types.ts
+│   │   └── utils.ts
+│   └── components/
+│       ├── ui/                 # shadcn/ui primitives
+│       ├── current-tab-card.tsx
+│       ├── storage-type-toggle.tsx
+│       ├── storage-items-list.tsx
+│       ├── target-tab-select.tsx     # searchable destination combobox
+│       ├── tab-favicon.tsx
+│       └── status-alert.tsx
+├── store/                     # Chrome Web Store submission assets
+│   ├── screenshots/           # 1280×800 listing screenshots
+│   ├── promo-tile-440x280.png
+│   ├── listing.md             # store copy + permission justifications
+│   └── PRIVACY.md             # privacy policy to host and link
+└── dist/                      # build output, load this as unpacked extension
 ```
 
-## ⚙️ How It Works
+## How it works
 
-**💾 localStorage/sessionStorage:** 
-- 💉 Uses `chrome.scripting.executeScript()` to inject code into source tab
-- 📖 Reads all storage items with `localStorage.getItem()` / `sessionStorage.getItem()`
-- ✅ User selects specific items to transfer
-- 💉 Injects code into destination tab and writes with `setItem()`
+**localStorage / sessionStorage**
+- `chrome.scripting.executeScript()` injects a reader into the source tab
+- User selects specific items to transfer
+- A writer is injected into the destination tab via `setItem()`
 
-**🍪 Cookies:** 
-- 📥 Uses `chrome.cookies.getAll()` API to read cookies from source URL
-- 🔒 Preserves all attributes: domain, path, secure, httpOnly, sameSite, expiration
-- 📤 Uses `chrome.cookies.set()` to write to destination tab
+**Cookies**
+- `chrome.cookies.getAll()` reads cookies from the source URL
+- All attributes are preserved: domain, path, secure, httpOnly, sameSite, expiration
+- `chrome.cookies.set()` writes to the destination tab
 
-**🎯 Tab Sorting:**
-- 🚀 Automatically prioritizes development tabs in dropdown
-- 📊 Priority order: `localhost` → `127.0.0.1` → `192.x` → `dev.` domains → others
-- ⚡ Makes it faster to select local development targets
+**Tab sorting**
+- Destination tabs are sorted by priority: `localhost` → `127.0.0.1` → `192.x` → `dev.` domains → others
 
-## 🌐 Browser Support
+## Browser support
 
-- ✅ Chrome 88+
-- ✅ Edge 88+ (Chromium)
-- ✅ Brave, Opera (should work)
+- Chrome 88+
+- Edge 88+ (Chromium)
+- Brave, Opera (should work)
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
-- ⚠️ Extension only works on HTTP/HTTPS pages
-- ❌ Doesn't work on `chrome://` pages
-- ⏳ Both source and destination tabs must be fully loaded
+- Extension only works on HTTP/HTTPS pages, not `chrome://` pages
+- Both source and destination tabs must be fully loaded
 
-## 🛠️ Development
+## Publishing to the Chrome Web Store
 
-**🔧 Technologies:**
-- ⚡ Manifest V3 (Chrome Extensions API)
-- 📝 Vanilla JavaScript (no dependencies, ~470 lines)
-- 🎨 HTML/CSS (embedded styles, Catppuccin theme)
+Everything needed for submission lives in [`store/`](store/):
 
-**🧩 Key Code Components:**
-- 🔄 `loadStorageType()` - Clears previous data, loads only selected type
-- 🚀 `transferStorage()` - Handles script injection and cookie API calls
-- 📋 `displayStorageItems()` - Renders checkboxes with metadata
-- 🎯 Tab sorting algorithm - Prioritizes localhost/dev environments
-
-**🧪 Testing:**
-1. ✏️ Edit files (popup.js, popup.html)
-2. 🌐 Go to `chrome://extensions/`
-3. 🔄 Click refresh icon on extension
-4. 🧪 Test between two localhost tabs with different ports
-5. 🔍 Use DevTools: Right-click extension → "Inspect popup"
-
-**💡 Debug Tips:**
-```javascript
-// 🧪 Test localStorage transfer
-localStorage.setItem('authToken', 'test123');
-localStorage.setItem('userId', '456');
-
-// 🔍 Check console in popup DevTools for errors
+```bash
+bun run build
+cd dist && zip -r -X ../storage-transfer.zip . -x ".*" && cd ..
 ```
 
-## 📄 License
+Then, in the [Developer Dashboard](https://chrome.google.com/webstore/devconsole):
 
-MIT License ✨
+1. Upload `storage-transfer.zip` as the package
+2. Paste the summary/description from [`store/listing.md`](store/listing.md)
+3. Upload the screenshots in [`store/screenshots/`](store/screenshots/) and the promo tile
+4. Fill in the Privacy practices tab using the justifications in `store/listing.md`, and link a hosted copy of [`store/PRIVACY.md`](store/PRIVACY.md) as the privacy policy URL
 
-## 🏷️ Version
+## License
 
-**Current version:** 1.0 🎉
-
+MIT
