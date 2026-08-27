@@ -4,6 +4,8 @@ Developer tool for transferring `localStorage`, `sessionStorage`, and cookies be
 
 > For developers only. Built to move storage data between environments (localhost, staging, production) during development and testing.
 
+**[Install from the Chrome Web Store →](https://chromewebstore.google.com/detail/storage-transfer/aodnlopajionekfhldpoddodfibcffek)**
+
 <p align="center">
   <img src="store/screenshots/2-select-items.png" alt="Storage Transfer — select items to transfer" width="100%" />
 </p>
